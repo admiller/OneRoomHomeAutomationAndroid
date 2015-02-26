@@ -23,70 +23,100 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
+public class LoginScreenActivity extends Activity {
 
-public class LoginScreenActivity extends Activity implements OnClickListener {
+	/**
+	 * Set this to true if you want to try to legitimately login. If you are
+	 * doing tests without connecting to the DB, set this to false
+	 */
+	private final boolean ATTEMPT_TO_CONNECT = false;
 
 	EditText user;
 	EditText pass;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+				.permitAll().build();
 		StrictMode.setThreadPolicy(policy);
-		
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_loginscreen);
 		Button loginButton = (Button) findViewById(R.id.buttonLogin);
-		user = (EditText)findViewById(R.id.editTextUsername);
-		pass = (EditText)findViewById(R.id.editTextPassword);
+		Button registerButton = (Button) findViewById(R.id.buttonRegister);
+		user = (EditText) findViewById(R.id.editTextUsername);
+		pass = (EditText) findViewById(R.id.editTextPassword);
 		user.setText("");
 		user.setHint("Username");
 		pass.setHint("Password");
-		loginButton.setOnClickListener(this);
+		loginButton.setOnClickListener(loginOnClickListener);
+		registerButton.setOnClickListener(registerOnClickListener);
 	}
 
-	@Override
-	public void onClick(View arg0) {
-		attemptLogin();
-	}
-	
+	private OnClickListener loginOnClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			if (ATTEMPT_TO_CONNECT) {
+				attemptLogin();
+			} else {
+				Intent dashboardIntent = new Intent(arg0.getContext(),
+						DashboardItemListActivity.class);
+				startActivity(dashboardIntent);
+				finish();
+			}
+		}
+	};
+
+	private OnClickListener registerOnClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			Intent registerIntent = new Intent(arg0.getContext(),
+					RegisterActivity.class);
+			startActivity(registerIntent);
+		}
+	};
+
 	private void attemptLogin() {
-	   int success = -1;
-	   HttpClient httpclient = new DefaultHttpClient();
-	   HttpPost httppost = new HttpPost("http://104.254.216.237/autopi/login.php");
-	 
-	   try{
-	    	List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-	        nameValuePairs.add(new BasicNameValuePair("username", user.getText().toString()));
-	        nameValuePairs.add(new BasicNameValuePair("password", pass.getText().toString()));
-	        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+		int success = -1;
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpPost httppost = new HttpPost(
+				"http://104.254.216.237/autopi/login.php");
 
-	        // Execute HTTP Post Request
-	        HttpResponse response = httpclient.execute(httppost);
-	        HttpEntity entity = response.getEntity();
-	        String responseString = EntityUtils.toString(entity, "UTF-8");
-	        success=Integer.parseInt(responseString);
-	        Log.d("DEBUG", String.valueOf(success));
-	    }catch(Exception e){
-	    	Log.d("DEBUG", "SOMETHING WENT WRONG!", e);
-	    }
-	    if(success>=0){
-	    	Intent dashboardIntent = new Intent(this, DashboardItemListActivity.class);
-	    	startActivity(dashboardIntent);
-	    	finish();
-	    }else
-	    	new AlertDialog.Builder(this)
-	        .setTitle("Invalid Login")
-	        .setMessage("Username or Password not found!")
-	        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-	            public void onClick(DialogInterface dialog, int which) { 
-	               
-	            }
-	         })
-	        .setIcon(android.R.drawable.ic_dialog_alert)
-	        .show();
-	        user.setText("");
-	        pass.setText("");
-	  }
+		try {
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+			nameValuePairs.add(new BasicNameValuePair("username", user
+					.getText().toString()));
+			nameValuePairs.add(new BasicNameValuePair("password", pass
+					.getText().toString()));
+			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+			// Execute HTTP Post Request
+			HttpResponse response = httpclient.execute(httppost);
+			HttpEntity entity = response.getEntity();
+			String responseString = EntityUtils.toString(entity, "UTF-8");
+			success = Integer.parseInt(responseString);
+			Log.d("DEBUG", String.valueOf(success));
+		} catch (Exception e) {
+			Log.d("DEBUG", "SOMETHING WENT WRONG!", e);
+		}
+		if (success >= 0) {
+			Intent dashboardIntent = new Intent(this,
+					DashboardItemListActivity.class);
+			startActivity(dashboardIntent);
+			finish();
+		} else
+			new AlertDialog.Builder(this)
+					.setTitle("Invalid Login")
+					.setMessage("Username or Password not found!")
+					.setPositiveButton(android.R.string.yes,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int which) {
+
+								}
+							}).setIcon(android.R.drawable.ic_dialog_alert)
+					.show();
+		user.setText("");
+		pass.setText("");
+	}
 }
-
-	

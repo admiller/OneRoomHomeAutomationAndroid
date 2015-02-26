@@ -6,53 +6,55 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/textViewDeviceTitle"
+        android:id="@+id/textViewRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="One-Room Home Automation"
+        android:text="Register"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <Button
-        android:id="@+id/buttonLogin"
+    <EditText
+        android:id="@+id/editTextRegisterName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/buttonRegister"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:text="Login" />
-
-    <Button
-        android:id="@+id/buttonRegister"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:text="Register" />
+        android:layout_below="@+id/textViewRegister"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name" />
 
     <EditText
-        android:id="@+id/editTextPassword"
+        android:id="@+id/editTextRegisterUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/buttonLogin"
-        android:layout_alignParentLeft="true"
+        android:layout_alignLeft="@+id/editTextRegisterName"
         android:layout_alignParentRight="true"
+        android:layout_below="@+id/editTextRegisterName"
+        android:ems="10"
+        android:text="Username" />
+
+    <EditText
+        android:id="@+id/editTextRegisterPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/editTextRegisterUsername"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/editTextRegisterUsername"
         android:ems="10"
         android:inputType="textPassword" >
 
         <requestFocus />
     </EditText>
 
-    <EditText
-        android:id="@+id/editTextUsername"
+    <Button
+        android:id="@+id/buttonRegisterSubmit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/editTextPassword"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:ems="10"
-        android:text="Username" />
+        android:layout_below="@+id/editTextRegisterPassword"
+        android:text="Submit" />
 
 </RelativeLayout>
