@@ -29,9 +29,9 @@ public class LoginScreenActivity extends Activity {
 	 * Set this to true if you want to try to legitimately login. If you are
 	 * doing tests without connecting to the DB, set this to false
 	 */
-	private final boolean ATTEMPT_TO_CONNECT = false;
+	private final boolean ATTEMPT_TO_CONNECT = true;
 
-	EditText user;
+	EditText email;
 	EditText pass;
 
 	@Override
@@ -44,10 +44,10 @@ public class LoginScreenActivity extends Activity {
 		setContentView(R.layout.activity_loginscreen);
 		Button loginButton = (Button) findViewById(R.id.buttonLogin);
 		Button registerButton = (Button) findViewById(R.id.buttonRegister);
-		user = (EditText) findViewById(R.id.editTextUsername);
+		email = (EditText) findViewById(R.id.editTextUsername);
 		pass = (EditText) findViewById(R.id.editTextPassword);
-		user.setText("");
-		user.setHint("Username");
+		email.setText("");
+		email.setHint("Email");
 		pass.setHint("Password");
 		loginButton.setOnClickListener(loginOnClickListener);
 		registerButton.setOnClickListener(registerOnClickListener);
@@ -80,11 +80,11 @@ public class LoginScreenActivity extends Activity {
 		int success = -1;
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost(
-				"http://104.254.216.237/autopi/login.php");
+				"http://104.254.216.237/oneroom/phpscripts/login.php");
 
 		try {
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-			nameValuePairs.add(new BasicNameValuePair("username", user
+			nameValuePairs.add(new BasicNameValuePair("email", email
 					.getText().toString()));
 			nameValuePairs.add(new BasicNameValuePair("password", pass
 					.getText().toString()));
@@ -95,7 +95,7 @@ public class LoginScreenActivity extends Activity {
 			HttpEntity entity = response.getEntity();
 			String responseString = EntityUtils.toString(entity, "UTF-8");
 			success = Integer.parseInt(responseString);
-			Log.d("DEBUG", String.valueOf(success));
+			Log.d("DEBUG", responseString);
 		} catch (Exception e) {
 			Log.d("DEBUG", "SOMETHING WENT WRONG!", e);
 		}
@@ -116,7 +116,7 @@ public class LoginScreenActivity extends Activity {
 								}
 							}).setIcon(android.R.drawable.ic_dialog_alert)
 					.show();
-		user.setText("");
+		email.setText("");
 		pass.setText("");
 	}
 }
