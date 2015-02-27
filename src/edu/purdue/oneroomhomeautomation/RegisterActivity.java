@@ -26,7 +26,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class RegisterActivity extends Activity {
-
+//test
 	/**
 	 * Set this to true if you want to try to legitimately register. If you are
 	 * doing tests without connecting to the DB, set this to false
