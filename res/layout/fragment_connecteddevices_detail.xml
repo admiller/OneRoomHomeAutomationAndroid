@@ -10,7 +10,7 @@
         android:layout_height="wrap_content" >
 
         <RelativeLayout
-            android:id="@+id/RelativeLayout1"
+            android:id="@+id/relativeLayoutConnectedDevices"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:columnCount="2"
@@ -33,30 +33,6 @@
                 android:layout_below="@+id/textViewNewDevice"
                 android:layout_gravity="left"
                 android:text="Add" />
-
-            <TextView
-                android:id="@+id/textViewDevice1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/buttonAddDevice"
-                android:text="Device 1: Lights"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-
-            <ToggleButton
-                android:id="@+id/toggleButtonDevice1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/textViewDevice1"
-                android:text="ToggleButton" />
-
-            <Button
-                android:id="@+id/buttonEditDevice1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/toggleButtonDevice1"
-                android:layout_alignBottom="@+id/toggleButtonDevice1"
-                android:layout_toRightOf="@+id/textViewDevice1"
-                android:text="Edit" />
 
         </RelativeLayout>
     </ScrollView>

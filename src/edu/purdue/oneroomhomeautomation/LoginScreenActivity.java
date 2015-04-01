@@ -29,7 +29,7 @@ public class LoginScreenActivity extends Activity {
 	 * Set this to true if you want to try to legitimately login. If you are
 	 * doing tests without connecting to the DB, set this to false
 	 */
-	private final boolean ATTEMPT_TO_CONNECT = true;
+	private final boolean ATTEMPT_TO_CONNECT = false;
 
 	EditText email;
 	EditText pass;

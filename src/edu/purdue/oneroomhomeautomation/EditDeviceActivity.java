@@ -8,6 +8,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 public class EditDeviceActivity extends Activity {
+	
+	public static Device currentDevice;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -17,6 +19,7 @@ public class EditDeviceActivity extends Activity {
 		submitButton.setOnClickListener(submitListener);
 		Button cancelButton = (Button) findViewById(R.id.buttonCancelEditDevice);
 		cancelButton.setOnClickListener(cancelListener);
+		Button newTimeButton = (Button) findViewById(R.id.buttonNewTimeEditDevice);
 		getActionBar().setTitle("Edit Device");
 	}
 
@@ -34,6 +37,13 @@ public class EditDeviceActivity extends Activity {
 		public void onClick(View v) {
 			// Close editing page
 			finish();
+		}
+	};
+	
+	private OnClickListener newTimeListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			
 		}
 	};
 
