@@ -20,6 +20,7 @@ public class Device {
 		this.isOn = isOn;
 		schedule = new ArrayList<ScheduledAction>();
 		editButton = null;
+		toggleButton = null;
 	}
 
 	public static ArrayList<Device> getDevices() {

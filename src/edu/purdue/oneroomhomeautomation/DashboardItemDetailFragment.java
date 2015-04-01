@@ -1,15 +1,16 @@
 package edu.purdue.oneroomhomeautomation;
 
-import java.util.ArrayList;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -22,6 +23,8 @@ import edu.purdue.oneroomhomeautomation.dummy.DummyContent;
  * (on tablets) or a {@link DashboardItemDetailActivity} on handsets.
  */
 public class DashboardItemDetailFragment extends Fragment {
+	
+	public static final String TAG = "ORHA";
 
 	/**
 	 * The base number for id's when they are created dynamically
@@ -110,13 +113,15 @@ public class DashboardItemDetailFragment extends Fragment {
 		rootView = createConnectedDevicesContent(rootView);
 		RelativeLayout rl = (RelativeLayout) rootView
 				.findViewById(R.id.relativeLayoutConnectedDevices);
+		
+		// Clear the layout (except for static items)
 		rl.removeViews(2, rl.getChildCount() - 2);
 
 		Button addButton = (Button) rootView.findViewById(R.id.buttonAddDevice);
 		addButton.setOnClickListener(addButtonOnClickListener);
 
 		// TODO get the list of devices from the server. Hard coded atm
-		if (Device.getDevices().size() == 0) {
+		if (Device.getDevices().size() < 0) {
 			Device lightsDevice = new Device("Lights", false);
 			Device cameraDevice = new Device("Camera", true);
 
@@ -124,74 +129,77 @@ public class DashboardItemDetailFragment extends Fragment {
 			Device.getDevices().add(cameraDevice);
 		}
 
-		// keeps track of the lowest toggle button for layout purposes
-		ToggleButton bottomToggle = null;
-		Button bottomEdit = null;
-		// Loop through devices
-		for (int i = 0; i < Device.getDevices().size(); i++) {
-			Device device = Device.getDevices().get(i);
+		if (Device.getDevices().size() > 0) {
+			// keeps track of the lowest toggle button for layout purposes
+			ToggleButton bottomToggle = null;
+			Button bottomEdit = null;
+			// Loop through devices
+			for (int i = 0; i < Device.getDevices().size(); i++) {
+				Device device = Device.getDevices().get(i);
 
-			// Create and set the TextView's text
-			TextView tv = new TextView(getActivity());
-			tv.setText("Device " + (i + 1) + ": " + device.getName());
-			tv.setTextAppearance(getActivity(),
-					android.R.style.TextAppearance_Large);
-			tv.setId(TEXT_VIEW_ID + i);
+				// Create and set the TextView's text
+				TextView tv = new TextView(getActivity());
+				tv.setText("Device " + (i + 1) + ": " + device.getName());
+				tv.setTextAppearance(getActivity(),
+						android.R.style.TextAppearance_Large);
+				tv.setId(TEXT_VIEW_ID + i);
 
-			ToggleButton tb = new ToggleButton(getActivity());
-			tb.setChecked(device.isOn());
-			tb.setId(TOGGLE_BUTTON_ID + i);
-			device.setToggleButton(tb);
+				ToggleButton tb = new ToggleButton(getActivity());
+				tb.setChecked(device.isOn());
+				tb.setId(TOGGLE_BUTTON_ID + i);
+				device.setToggleButton(tb);
 
-			Button eb = new Button(getActivity());
-			eb.setText("Edit");
-			eb.setId(EDIT_BUTTON_ID + i);
-			device.setEditButton(eb);
+				Button eb = new Button(getActivity());
+				eb.setText("Edit");
+				eb.setId(EDIT_BUTTON_ID + i);
+				device.setEditButton(eb);
 
-			RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			// Set the TextView layout parameters and add the view
-			if (i == 0) { // This is the first device on the list
-				rlp.addRule(RelativeLayout.BELOW, addButton.getId());
-				tv.setLayoutParams(rlp);
-				rl.addView(tv);
-			} else { // add the device below the last device
-				rlp.addRule(RelativeLayout.BELOW, bottomToggle.getId());
-				tv.setLayoutParams(rlp);
-				rl.addView(tv);
+				RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
+						RelativeLayout.LayoutParams.WRAP_CONTENT,
+						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				// Set the TextView layout parameters and add the view
+				if (i == 0) { // This is the first device on the list
+					rlp.addRule(RelativeLayout.BELOW, addButton.getId());
+					tv.setLayoutParams(rlp);
+					rl.addView(tv);
+				} else { // add the device below the last device
+					rlp.addRule(RelativeLayout.BELOW, bottomToggle.getId());
+					tv.setLayoutParams(rlp);
+					rl.addView(tv);
+				}
+
+				// Set the ToggleButton layout parameters and add it
+				rlp = new RelativeLayout.LayoutParams(
+						RelativeLayout.LayoutParams.WRAP_CONTENT,
+						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				rlp.addRule(RelativeLayout.BELOW, tv.getId());
+				tb.setLayoutParams(rlp);
+				rl.addView(tb);
+				// Set the bottomToggle field
+				bottomToggle = tb;
+				// Add the listener for the toggle button
+				tb.setOnCheckedChangeListener(toggleButtonChangeListener);
+
+				// Set the EditButton layout parameters and add it
+				rlp = new RelativeLayout.LayoutParams(
+						RelativeLayout.LayoutParams.WRAP_CONTENT,
+						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				rlp.addRule(RelativeLayout.ALIGN_BASELINE, tb.getId());
+				rlp.addRule(RelativeLayout.ALIGN_BOTTOM, tb.getId());
+				if (bottomEdit != null) {
+					rlp.addRule(RelativeLayout.ALIGN_RIGHT, bottomEdit.getId());
+				} else {
+					rlp.addRule(RelativeLayout.RIGHT_OF, tv.getId());
+				}
+				eb.setLayoutParams(rlp);
+				rl.addView(eb);
+				// Set the bottomEdit field
+				bottomEdit = eb;
+				// Add the listener for the edit button
+				eb.setOnClickListener(editButtonOnClickListener);
 			}
-
-			// Set the ToggleButton layout parameters and add it
-			rlp = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			rlp.addRule(RelativeLayout.BELOW, tv.getId());
-			tb.setLayoutParams(rlp);
-			rl.addView(tb);
-			// Set the bottomToggle field
-			bottomToggle = tb;
-
-			// Set the EditButton layout parameters and add it
-			rlp = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			rlp.addRule(RelativeLayout.ALIGN_BASELINE, tb.getId());
-			rlp.addRule(RelativeLayout.ALIGN_BOTTOM, tb.getId());
-			if (bottomEdit != null) {
-				rlp.addRule(RelativeLayout.ALIGN_RIGHT, bottomEdit.getId());
-			} else {
-				rlp.addRule(RelativeLayout.RIGHT_OF, tv.getId());
-			}
-			eb.setLayoutParams(rlp);
-			rl.addView(eb);
-			// Set the bottomEdit field
-			bottomEdit = eb;
 		}
 
-		// Button editButton = (Button) rootView
-		// .findViewById(R.id.buttonEditDevice1);
-		// editButton.setOnClickListener(editButtonOnClickListener);
 		getActivity().getActionBar().setTitle("Connected Devices");
 	}
 
@@ -209,6 +217,37 @@ public class DashboardItemDetailFragment extends Fragment {
 		return ((LinearLayout) rootView.findViewById(R.id.logout_detail));
 	}
 
+	private OnCheckedChangeListener toggleButtonChangeListener = new OnCheckedChangeListener() {
+		@Override
+		public void onCheckedChanged(CompoundButton button, boolean isOn) {
+			for (int i = 0; i < Device.getDevices().size(); i++) {
+				Device device = Device.getDevices().get(i);
+				if (device.getToggleButton().getId() == button.getId()) {
+					device.toggleDevice();
+					// TODO communicate with server to make this physically
+					// toggle
+					break;
+				}
+			}
+		}
+	};
+	
+	private OnClickListener editButtonOnClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			for(int i = 0; i < Device.getDevices().size(); i++) {
+				Device device = Device.getDevices().get(i);
+				if(device.getEditButton().getId() == v.getId()) {
+					EditDeviceActivity.currentDevice = device;
+					Intent editIntent = new Intent(getActivity(),
+							EditDeviceActivity.class);
+					startActivity(editIntent);
+					break;
+				}
+			}
+		}
+	};
+
 	private OnClickListener logoutButtonOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -217,16 +256,7 @@ public class DashboardItemDetailFragment extends Fragment {
 			startActivity(loginIntent);
 			getActivity().finish();
 		}
-	};
-
-	private OnClickListener editButtonOnClickListener = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			Intent editIntent = new Intent(getActivity(),
-					EditDeviceActivity.class);
-			startActivity(editIntent);
-		}
-	};
+	};	
 
 	private OnClickListener addButtonOnClickListener = new OnClickListener() {
 		@Override
