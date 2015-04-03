@@ -3,7 +3,6 @@ package edu.purdue.oneroomhomeautomation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -11,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -96,6 +96,13 @@ public class DashboardItemDetailFragment extends Fragment {
 						false);
 				rootView = createAccountSettingsContent(rootView);
 				getActivity().getActionBar().setTitle("Account Settings");
+
+				// TODO Lee you can set the text here. I've made an example for
+				// the name field
+				// The field names are in fragment_accountsettings.xml
+				EditText userName = (EditText) rootView
+						.findViewById(R.id.editTextUsername);
+				userName.setText("WHATEVER THE NAME IS");
 			} else if (mItem.content.equals("Logout")) {
 				rootView = inflater.inflate(R.layout.fragment_logout_detail,
 						container, false);
@@ -115,12 +122,12 @@ public class DashboardItemDetailFragment extends Fragment {
 
 	public void showConnectedDevices() {
 		rootView = createConnectedDevicesContent(rootView);
-		if(rootView == null) {
+		if (rootView == null) {
 			return;
 		}
 		RelativeLayout rl = (RelativeLayout) rootView
 				.findViewById(R.id.relativeLayoutConnectedDevices);
-		if(rl == null) {
+		if (rl == null) {
 			return;
 		}
 
