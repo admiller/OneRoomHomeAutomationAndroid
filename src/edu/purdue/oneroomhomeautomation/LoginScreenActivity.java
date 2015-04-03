@@ -31,7 +31,7 @@ public class LoginScreenActivity extends Activity {
 	 * Set this to true if you want to try to legitimately login. If you are
 	 * doing tests without connecting to the DB, set this to false
 	 */
-	private final boolean ATTEMPT_TO_CONNECT = false;
+	private final boolean ATTEMPT_TO_CONNECT = true;
 
 	EditText email;
 	EditText pass;
@@ -97,9 +97,9 @@ public class LoginScreenActivity extends Activity {
 			HttpResponse response = httpclient.execute(httppost);
 			HttpEntity entity = response.getEntity();
 			String responseString = EntityUtils.toString(entity, "UTF-8");
-			JSONArray r = new JSONArray();
-			id = r.getInt(0);
 			
+			JSONArray r = new JSONArray(responseString);
+			id = r.getInt(0);
 			
 			Log.d("DEBUG", responseString);
 		} catch (Exception e) {
