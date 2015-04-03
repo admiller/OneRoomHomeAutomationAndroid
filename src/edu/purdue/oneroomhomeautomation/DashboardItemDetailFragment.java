@@ -23,7 +23,9 @@ import edu.purdue.oneroomhomeautomation.dummy.DummyContent;
  * (on tablets) or a {@link DashboardItemDetailActivity} on handsets.
  */
 public class DashboardItemDetailFragment extends Fragment {
-	
+
+	public static boolean loggedIn = false;
+
 	public static final String TAG = "ORHA";
 
 	/**
@@ -71,7 +73,9 @@ public class DashboardItemDetailFragment extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		showConnectedDevices();
+		if (loggedIn) {
+			showConnectedDevices();
+		}
 	}
 
 	@Override
@@ -111,9 +115,15 @@ public class DashboardItemDetailFragment extends Fragment {
 
 	public void showConnectedDevices() {
 		rootView = createConnectedDevicesContent(rootView);
+		if(rootView == null) {
+			return;
+		}
 		RelativeLayout rl = (RelativeLayout) rootView
 				.findViewById(R.id.relativeLayoutConnectedDevices);
-		
+		if(rl == null) {
+			return;
+		}
+
 		// Clear the layout (except for static items)
 		rl.removeViews(2, rl.getChildCount() - 2);
 
@@ -231,13 +241,13 @@ public class DashboardItemDetailFragment extends Fragment {
 			}
 		}
 	};
-	
+
 	private OnClickListener editButtonOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			for(int i = 0; i < Device.getDevices().size(); i++) {
+			for (int i = 0; i < Device.getDevices().size(); i++) {
 				Device device = Device.getDevices().get(i);
-				if(device.getEditButton().getId() == v.getId()) {
+				if (device.getEditButton().getId() == v.getId()) {
 					EditDeviceActivity.currentDevice = device;
 					Intent editIntent = new Intent(getActivity(),
 							EditDeviceActivity.class);
@@ -251,12 +261,13 @@ public class DashboardItemDetailFragment extends Fragment {
 	private OnClickListener logoutButtonOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
+			loggedIn = false;
 			Intent loginIntent = new Intent(getActivity(),
 					LoginScreenActivity.class);
 			startActivity(loginIntent);
 			getActivity().finish();
 		}
-	};	
+	};
 
 	private OnClickListener addButtonOnClickListener = new OnClickListener() {
 		@Override

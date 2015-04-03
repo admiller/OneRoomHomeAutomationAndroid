@@ -59,6 +59,7 @@ public class LoginScreenActivity extends Activity {
 			if (ATTEMPT_TO_CONNECT) {
 				attemptLogin();
 			} else {
+				DashboardItemDetailFragment.loggedIn = true;
 				Intent dashboardIntent = new Intent(arg0.getContext(),
 						DashboardItemListActivity.class);
 				startActivity(dashboardIntent);
@@ -100,6 +101,7 @@ public class LoginScreenActivity extends Activity {
 			Log.d("DEBUG", "SOMETHING WENT WRONG!", e);
 		}
 		if (success >= 0) {
+			DashboardItemDetailFragment.loggedIn = true;
 			Intent dashboardIntent = new Intent(this,
 					DashboardItemListActivity.class);
 			startActivity(dashboardIntent);
