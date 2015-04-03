@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+
 import java.util.*;
 
 import org.apache.http.HttpEntity;
@@ -22,6 +23,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 
 public class LoginScreenActivity extends Activity {
 
@@ -78,7 +80,7 @@ public class LoginScreenActivity extends Activity {
 	};
 
 	private void attemptLogin() {
-		int success = -1;
+		int id = -1;
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost(
 				"http://104.254.216.237/oneroom/phpscripts/login.php");
@@ -95,12 +97,15 @@ public class LoginScreenActivity extends Activity {
 			HttpResponse response = httpclient.execute(httppost);
 			HttpEntity entity = response.getEntity();
 			String responseString = EntityUtils.toString(entity, "UTF-8");
-			success = Integer.parseInt(responseString);
+			JSONArray r = new JSONArray();
+			id = r.getInt(0);
+			
+			
 			Log.d("DEBUG", responseString);
 		} catch (Exception e) {
 			Log.d("DEBUG", "SOMETHING WENT WRONG!", e);
 		}
-		if (success >= 0) {
+		if (id >= 0) {
 			DashboardItemDetailFragment.loggedIn = true;
 			Intent dashboardIntent = new Intent(this,
 					DashboardItemListActivity.class);
@@ -122,3 +127,4 @@ public class LoginScreenActivity extends Activity {
 		pass.setText("");
 	}
 }
+
