@@ -127,7 +127,7 @@ public class DashboardItemDetailFragment extends Fragment {
 					HttpEntity entity = response.getEntity();
 					String responseString = EntityUtils.toString(entity,
 							"UTF-8");
-
+					Log.d("DEBUG", responseString);
 					JSONArray r = new JSONArray(responseString);
 
 					Log.d("DEBUG", responseString);
@@ -157,7 +157,7 @@ public class DashboardItemDetailFragment extends Fragment {
 							.setOnClickListener(savePasswordOnClickListener);
 
 				} catch (Exception e) {
-					Log.d("ERRORRRRR", "bad things happened");
+					Log.d("ERRORRRRR", e.toString());
 				}
 			} else if (mItem.content.equals("Logout")) {
 				rootView = inflater.inflate(R.layout.fragment_logout_detail,
@@ -368,7 +368,7 @@ public class DashboardItemDetailFragment extends Fragment {
 						Log.d("DEBUG", responseString);
 
 					} catch (Exception e) {
-
+						
 					}
 					
 					break;
@@ -401,15 +401,17 @@ public class DashboardItemDetailFragment extends Fragment {
 					"http://104.254.216.237/oneroom/phpscripts/editUser.php");
 			try {
 				// CHECK TO SEE IF OLD PASS IS SAME.
-				EditText oldpass = (EditText) rootView
-						.findViewById(R.id.editTextOldPassword);
-				EditText newpass = (EditText) rootView
-						.findViewById(R.id.editTextNewPassword);
-				EditText userName = (EditText) rootView
-						.findViewById(R.id.editTextName);
-				EditText email = (EditText) rootView
-						.findViewById(R.id.editTextEmail);
-
+				//Log.d("CHP", "STARTING TO GRAB");
+				EditText oldpass = (EditText) v.findViewById(R.id.editTextOldPassword);
+				Log.d("CHP", oldpass.getText().toString());
+				EditText newpass = (EditText) v.findViewById(R.id.editTextNewPassword);
+				Log.d("CHP", newpass.getText().toString());
+				EditText userName = (EditText) v.findViewById(R.id.editTextName);
+				Log.d("CHP", userName.getText().toString());
+				EditText email = (EditText) v.findViewById(R.id.editTextEmail);
+				Log.d("CHP", email.getText().toString());
+		
+				
 				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
 						3);
 				nameValuePairs.add(new BasicNameValuePair("id", String
@@ -422,6 +424,8 @@ public class DashboardItemDetailFragment extends Fragment {
 						.getText().toString()));
 				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
+
+				
 				// Execute HTTP Post Request
 				HttpResponse response = httpclient.execute(httppost);
 				HttpEntity entity = response.getEntity();
@@ -430,6 +434,7 @@ public class DashboardItemDetailFragment extends Fragment {
 				Log.d("DEBUG", responseString);
 
 			} catch (Exception e) {
+				Log.d("ERROR CHANGING PASSWORD","ERROR", e);
 
 			}
 			Log.d("YOUDIDIT", "SAVED PASSWORD");
