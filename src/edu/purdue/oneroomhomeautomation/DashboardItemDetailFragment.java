@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -110,47 +111,52 @@ public class DashboardItemDetailFragment extends Fragment {
 						false);
 				showConnectedDevices();
 			} else if (mItem.content.equals("Account Settings")) {
-				
+
 				HttpClient httpclient = new DefaultHttpClient();
 				HttpPost httppost = new HttpPost(
 						"http://104.254.216.237/oneroom/phpscripts/getUserInfo.php");
 				try {
-					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-					nameValuePairs.add(new BasicNameValuePair("id", String.valueOf(LoginScreenActivity.id)));
+					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+							1);
+					nameValuePairs.add(new BasicNameValuePair("id", String
+							.valueOf(LoginScreenActivity.id)));
 					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-					
+
 					// Execute HTTP Post Request
 					HttpResponse response = httpclient.execute(httppost);
 					HttpEntity entity = response.getEntity();
-					String responseString = EntityUtils.toString(entity, "UTF-8");
-					
-					JSONArray r = new JSONArray(responseString);
-					
-					Log.d("DEBUG", responseString);
-				
-				rootView = inflater.inflate(
-						R.layout.fragment_accountsettings_detail, container,
-						false);
-				rootView = createAccountSettingsContent(rootView);
-				getActivity().getActionBar().setTitle("Account Settings");
+					String responseString = EntityUtils.toString(entity,
+							"UTF-8");
 
-				// TODO Lee you can set the text here. I've made an example for
-				// the name field
-				// The field names are in fragment_accountsettings.xml
-				EditText userName = (EditText) rootView
-						.findViewById(R.id.editTextName);
-				EditText email = (EditText) rootView
-						.findViewById(R.id.editTextEmail);
-				userName.setText(r.getString(2));
-				email.setText(r.getString(3));
-				
-				Button saveSettings = (Button) rootView.findViewById(R.id.buttonSaveSettings);
-				saveSettings.setOnClickListener(saveSettingsOnClickListener);
-				
-				Button savePassword = (Button) rootView.findViewById(R.id.buttonChangePassword);
-				savePassword.setOnClickListener(savePasswordOnClickListener);
-				
-				}catch(Exception e){
+					JSONArray r = new JSONArray(responseString);
+
+					Log.d("DEBUG", responseString);
+
+					rootView = inflater.inflate(
+							R.layout.fragment_accountsettings_detail,
+							container, false);
+					rootView = createAccountSettingsContent(rootView);
+					getActivity().getActionBar().setTitle("Account Settings");
+
+					// TODO Lee you can set the text here.
+					EditText userName = (EditText) rootView
+							.findViewById(R.id.editTextName);
+					EditText email = (EditText) rootView
+							.findViewById(R.id.editTextEmail);
+					userName.setText(r.getString(2));
+					email.setText(r.getString(3));
+
+					Button saveSettings = (Button) rootView
+							.findViewById(R.id.buttonSaveSettings);
+					saveSettings
+							.setOnClickListener(saveSettingsOnClickListener);
+
+					Button savePassword = (Button) rootView
+							.findViewById(R.id.buttonChangePassword);
+					savePassword
+							.setOnClickListener(savePasswordOnClickListener);
+
+				} catch (Exception e) {
 					Log.d("ERRORRRRR", "bad things happened");
 				}
 			} else if (mItem.content.equals("Logout")) {
@@ -171,36 +177,61 @@ public class DashboardItemDetailFragment extends Fragment {
 	}
 
 	public void showConnectedDevices() {
-		
-		try{
-		URL server = new URL("http://104.254.216.237/oneroom/phpscripts/getUtils.php");
-		URLConnection r = server.openConnection();
-		BufferedReader in = new BufferedReader(new InputStreamReader(r.getInputStream()));
-		JSONArray resp = new JSONArray(in.readLine());
-		for(int i=0; i<resp.length();i++){
-			Device temp = null;
-			if(resp.getJSONArray(i).toString().endsWith("0\"]")){
-				temp = new Device(resp.getJSONArray(i).get(1).toString(), false);
-			}else if (resp.getJSONArray(i).toString().endsWith("1\"]")){
-				temp = new Device(resp.getJSONArray(i).get(1).toString(), true);
+
+		try {
+			URL server = new URL(
+					"http://104.254.216.237/oneroom/phpscripts/getUtils.php");
+			URLConnection r = server.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					r.getInputStream()));
+			JSONArray resp = new JSONArray(in.readLine());
+			for (int i = 0; i < resp.length(); i++) {
+				// Log.d(TAG, resp.toString());
+
+				// Check to make sure the device is not in our list already
+				int devId = resp.getJSONArray(i).getInt(0);
+				boolean deviceExists = false;
+				for (int j = 0; j < Device.getDevices().size(); j++) {
+					if (Device.getDevices().get(j).getId() == devId) {
+						Device dev = Device.getDevices().get(j);
+						if (resp.getJSONArray(i).getInt(2) == 1) {
+							dev.setIsOn(true);
+						} else {
+							dev.setIsOn(false);
+						}
+						dev.setName(resp.getJSONArray(i).getString(1));
+						deviceExists = true;
+					}
+				}
+
+				// If the device is not in our list, create a new device and add
+				// it to the list
+				if (!deviceExists) {
+					Device temp = null;
+					if (resp.getJSONArray(i).toString().endsWith("0\"]")) {
+						temp = new Device(resp.getJSONArray(i).getString(1),
+								false, resp.getJSONArray(i).getInt(0));
+					} else if (resp.getJSONArray(i).toString().endsWith("1\"]")) {
+						temp = new Device(resp.getJSONArray(i).getString(1),
+								true, resp.getJSONArray(i).getInt(0));
+					}
+					Device.getDevices().add(temp);
+				}
 			}
-			Device.getDevices().add(temp);
+			in.close();
+		} catch (Exception e) {
+
 		}
-		in.close();
-		}catch(Exception e){
-			
-		}
-		/*try {
-			
-			HttpResponse response = httpclient.execute(httppost);
-			HttpEntity entity = response.getEntity();
-			String responseString = EntityUtils.toString(entity, "UTF-8");
-			
-		}catch(Exception e){
-			Log.getStackTraceString(e);
-			Log.d("EXCEPTION", e.toString());
-		}
-		*/
+		/*
+		 * try {
+		 * 
+		 * HttpResponse response = httpclient.execute(httppost); HttpEntity
+		 * entity = response.getEntity(); String responseString =
+		 * EntityUtils.toString(entity, "UTF-8");
+		 * 
+		 * }catch(Exception e){ Log.getStackTraceString(e); Log.d("EXCEPTION",
+		 * e.toString()); }
+		 */
 		rootView = createConnectedDevicesContent(rootView);
 		if (rootView == null) {
 			return;
@@ -217,22 +248,19 @@ public class DashboardItemDetailFragment extends Fragment {
 		Button addButton = (Button) rootView.findViewById(R.id.buttonAddDevice);
 		addButton.setOnClickListener(addButtonOnClickListener);
 
-		// TODO get the list of devices from the server. Hard coded atm
-		if (Device.getDevices().size() < 0) {
-			
-		}
-		
 		if (Device.getDevices().size() > 0) {
 			// keeps track of the lowest toggle button for layout purposes
 			ToggleButton bottomToggle = null;
 			Button bottomEdit = null;
+
+			Collections.sort(Device.getDevices());
 			// Loop through devices
 			for (int i = 0; i < Device.getDevices().size(); i++) {
 				Device device = Device.getDevices().get(i);
 
 				// Create and set the TextView's text
 				TextView tv = new TextView(getActivity());
-				tv.setText("Device " + (i + 1) + ": " + device.getName());
+				tv.setText("Device " + device.getId() + ": " + device.getName());
 				tv.setTextAppearance(getActivity(),
 						android.R.style.TextAppearance_Large);
 				tv.setId(TEXT_VIEW_ID + i);
@@ -348,7 +376,7 @@ public class DashboardItemDetailFragment extends Fragment {
 			HttpPost httppost = new HttpPost(
 					"http://104.254.216.237/oneroom/phpscripts/editUser.php");
 			try {
-				//CHECK TO SEE IF OLD PASS IS SAME.
+				// CHECK TO SEE IF OLD PASS IS SAME.
 				EditText oldpass = (EditText) rootView
 						.findViewById(R.id.editTextOldPassword);
 				EditText newpass = (EditText) rootView
@@ -357,29 +385,33 @@ public class DashboardItemDetailFragment extends Fragment {
 						.findViewById(R.id.editTextName);
 				EditText email = (EditText) rootView
 						.findViewById(R.id.editTextEmail);
-				
-				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
-				nameValuePairs.add(new BasicNameValuePair("id", String.valueOf(LoginScreenActivity.id)));
-				nameValuePairs.add(new BasicNameValuePair("name", userName.getText().toString()));
-				nameValuePairs.add(new BasicNameValuePair("email", email.getText().toString()));
-				nameValuePairs.add(new BasicNameValuePair("password", newpass.getText().toString()));
+
+				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+						3);
+				nameValuePairs.add(new BasicNameValuePair("id", String
+						.valueOf(LoginScreenActivity.id)));
+				nameValuePairs.add(new BasicNameValuePair("name", userName
+						.getText().toString()));
+				nameValuePairs.add(new BasicNameValuePair("email", email
+						.getText().toString()));
+				nameValuePairs.add(new BasicNameValuePair("password", newpass
+						.getText().toString()));
 				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-				
+
 				// Execute HTTP Post Request
 				HttpResponse response = httpclient.execute(httppost);
 				HttpEntity entity = response.getEntity();
 				String responseString = EntityUtils.toString(entity, "UTF-8");
-				
+
 				Log.d("DEBUG", responseString);
-				
-				
-			}catch(Exception e){
-				
+
+			} catch (Exception e) {
+
 			}
-			Log.d("YOUDIDIT","SAVED PASSWORD");
+			Log.d("YOUDIDIT", "SAVED PASSWORD");
 		}
 	};
-	
+
 	private OnClickListener saveSettingsOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -391,15 +423,15 @@ public class DashboardItemDetailFragment extends Fragment {
 						.findViewById(R.id.editTextName);
 				EditText email = (EditText) rootView
 						.findViewById(R.id.editTextEmail);
-				//TODO HAVE BRANDON ADD A EDIT SETTINGS WITHOUT THE PASSWORD
-				
-			}catch(Exception e){
-				
+				// TODO HAVE BRANDON ADD A EDIT SETTINGS WITHOUT THE PASSWORD
+
+			} catch (Exception e) {
+
 			}
-			Log.d("YOUDIDIT","SAVED SETTINGS");
+			Log.d("YOUDIDIT", "SAVED SETTINGS");
 		}
 	};
-	
+
 	private OnClickListener logoutButtonOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {

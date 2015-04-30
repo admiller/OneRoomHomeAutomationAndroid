@@ -28,7 +28,7 @@ import android.widget.ToggleButton;
 public class AddDeviceActivity extends Activity {
 
 	private final boolean ATTEMPT_TO_CONNECT = true;
-	
+
 	EditText deviceNameEditText;
 	ToggleButton deviceToggleButton;
 
@@ -55,32 +55,36 @@ public class AddDeviceActivity extends Activity {
 				HttpPost httppost = new HttpPost(
 						"http://104.254.216.237/oneroom/phpscripts/createUtil.php");
 				try {
-					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-					nameValuePairs.add(new BasicNameValuePair("utilName", deviceNameEditText
-							.getText().toString()));
-					if(deviceToggleButton.isChecked()){
-						nameValuePairs.add(new BasicNameValuePair("state","1"));
+					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+							1);
+					nameValuePairs.add(new BasicNameValuePair("utilName",
+							deviceNameEditText.getText().toString()));
+					if (deviceToggleButton.isChecked()) {
+						nameValuePairs
+								.add(new BasicNameValuePair("state", "1"));
 						state = 1;
-					}else{
-						nameValuePairs.add(new BasicNameValuePair("state","0"));
-						state=0;
+					} else {
+						nameValuePairs
+								.add(new BasicNameValuePair("state", "0"));
+						state = 0;
 					}
 					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 					Log.d("DEBUG", String.valueOf(state));
-					
+
 					HttpResponse response = httpclient.execute(httppost);
 					HttpEntity entity = response.getEntity();
-					String responseString = EntityUtils.toString(entity, "UTF-8");
+					String responseString = EntityUtils.toString(entity,
+							"UTF-8");
 					resp = Integer.parseInt(responseString);
-					
-				}catch(Exception e){
+
+				} catch (Exception e) {
 					Log.getStackTraceString(e);
 					Log.d("EXCEPTION", e.toString());
-					
+
 				}
-				
+
 			}
-			
+
 			finish();
 		}
 	};
