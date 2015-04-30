@@ -346,8 +346,31 @@ public class DashboardItemDetailFragment extends Fragment {
 				Device device = Device.getDevices().get(i);
 				if (device.getToggleButton().getId() == button.getId()) {
 					device.toggleDevice();
-					// TODO communicate with server to make this physically
-					// toggle
+					
+					String name = device.getName().toString();
+					boolean state = button.isChecked();
+					HttpClient httpclient = new DefaultHttpClient();
+					HttpPost httppost = new HttpPost(
+							"http://104.254.216.237/oneroom/phpscripts/changeState.php");
+					try {
+						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+						nameValuePairs.add(new BasicNameValuePair("utilName", name));
+						if(state){
+							nameValuePairs.add(new BasicNameValuePair("state","1"));
+						}else{
+							nameValuePairs.add(new BasicNameValuePair("state","0"));
+						}
+						httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+						HttpResponse response = httpclient.execute(httppost);
+						HttpEntity entity = response.getEntity();
+						String responseString = EntityUtils.toString(entity, "UTF-8");
+						Log.d("DEBUG", name);
+						Log.d("DEBUG", responseString);
+
+					} catch (Exception e) {
+
+					}
+					
 					break;
 				}
 			}
