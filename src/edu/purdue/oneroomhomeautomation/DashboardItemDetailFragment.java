@@ -112,10 +112,10 @@ public class DashboardItemDetailFragment extends Fragment {
 						false);
 				showConnectedDevices();
 			} else if (mItem.content.equals("Account Settings")) {
-				
+
 				rootView = inflater.inflate(
-						R.layout.fragment_accountsettings_detail,
-						container, false);
+						R.layout.fragment_accountsettings_detail, container,
+						false);
 				rootView = createAccountSettingsContent(rootView);
 				getActivity().getActionBar().setTitle("Account Settings");
 
@@ -156,7 +156,7 @@ public class DashboardItemDetailFragment extends Fragment {
 							.findViewById(R.id.buttonChangePassword);
 					savePassword
 							.setOnClickListener(savePasswordOnClickListener);
-					
+
 					accountSettingsView = rootView;
 
 				} catch (Exception e) {
@@ -349,31 +349,37 @@ public class DashboardItemDetailFragment extends Fragment {
 				Device device = Device.getDevices().get(i);
 				if (device.getToggleButton().getId() == button.getId()) {
 					device.toggleDevice();
-					
+
 					String name = device.getName().toString();
 					boolean state = button.isChecked();
 					HttpClient httpclient = new DefaultHttpClient();
 					HttpPost httppost = new HttpPost(
 							"http://104.254.216.237/oneroom/phpscripts/changeState.php");
 					try {
-						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-						nameValuePairs.add(new BasicNameValuePair("utilName", name));
-						if(state){
-							nameValuePairs.add(new BasicNameValuePair("state","1"));
-						}else{
-							nameValuePairs.add(new BasicNameValuePair("state","0"));
+						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+								1);
+						nameValuePairs.add(new BasicNameValuePair("utilName",
+								name));
+						if (state) {
+							nameValuePairs.add(new BasicNameValuePair("state",
+									"1"));
+						} else {
+							nameValuePairs.add(new BasicNameValuePair("state",
+									"0"));
 						}
-						httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+						httppost.setEntity(new UrlEncodedFormEntity(
+								nameValuePairs));
 						HttpResponse response = httpclient.execute(httppost);
 						HttpEntity entity = response.getEntity();
-						String responseString = EntityUtils.toString(entity, "UTF-8");
+						String responseString = EntityUtils.toString(entity,
+								"UTF-8");
 						Log.d("DEBUG", name);
 						Log.d("DEBUG", responseString);
 
 					} catch (Exception e) {
-						
+
 					}
-					
+
 					break;
 				}
 			}
@@ -404,18 +410,21 @@ public class DashboardItemDetailFragment extends Fragment {
 					"http://104.254.216.237/oneroom/phpscripts/editUser.php");
 			try {
 				// CHECK TO SEE IF OLD PASS IS SAME.
-				//Log.d("CHP", "STARTING TO GRAB");
-				
-				EditText oldpass = (EditText) accountSettingsView.findViewById(R.id.editTextOldPassword);
+				// Log.d("CHP", "STARTING TO GRAB");
+
+				EditText oldpass = (EditText) accountSettingsView
+						.findViewById(R.id.editTextOldPassword);
 				Log.d("CHP", oldpass.getText().toString());
-				EditText newpass = (EditText) accountSettingsView.findViewById(R.id.editTextNewPassword);
+				EditText newpass = (EditText) accountSettingsView
+						.findViewById(R.id.editTextNewPassword);
 				Log.d("CHP", newpass.getText().toString());
-				EditText userName = (EditText) accountSettingsView.findViewById(R.id.editTextName);
+				EditText userName = (EditText) accountSettingsView
+						.findViewById(R.id.editTextName);
 				Log.d("CHP", userName.getText().toString());
-				EditText email = (EditText) accountSettingsView.findViewById(R.id.editTextEmail);
+				EditText email = (EditText) accountSettingsView
+						.findViewById(R.id.editTextEmail);
 				Log.d("CHP", email.getText().toString());
-		
-				
+
 				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
 						3);
 				nameValuePairs.add(new BasicNameValuePair("id", String
@@ -427,11 +436,10 @@ public class DashboardItemDetailFragment extends Fragment {
 				nameValuePairs.add(new BasicNameValuePair("password", newpass
 						.getText().toString()));
 				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-				
-				Log.d("CHP", "Changing password to " + newpass.getText().toString());
 
+				Log.d("CHP", "Changing password to "
+						+ newpass.getText().toString());
 
-				
 				// Execute HTTP Post Request
 				HttpResponse response = httpclient.execute(httppost);
 				HttpEntity entity = response.getEntity();
@@ -440,7 +448,7 @@ public class DashboardItemDetailFragment extends Fragment {
 				Log.d("DEBUG", responseString);
 
 			} catch (Exception e) {
-				Log.d("ERROR CHANGING PASSWORD","ERROR", e);
+				Log.d("ERROR CHANGING PASSWORD", "ERROR", e);
 
 			}
 			Log.d("YOUDIDIT", "SAVED PASSWORD");
@@ -454,9 +462,9 @@ public class DashboardItemDetailFragment extends Fragment {
 			HttpPost httppost = new HttpPost(
 					"http://104.254.216.237/oneroom/phpscripts/editUser.php");
 			try {
-				EditText userName = (EditText) rootView
+				EditText userName = (EditText) accountSettingsView
 						.findViewById(R.id.editTextName);
-				EditText email = (EditText) rootView
+				EditText email = (EditText) accountSettingsView
 						.findViewById(R.id.editTextEmail);
 				// TODO HAVE BRANDON ADD A EDIT SETTINGS WITHOUT THE PASSWORD
 
