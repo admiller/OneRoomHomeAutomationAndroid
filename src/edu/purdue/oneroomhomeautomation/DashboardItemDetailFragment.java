@@ -19,6 +19,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -411,21 +413,19 @@ public class DashboardItemDetailFragment extends Fragment {
 			HttpPost httppost2 = new HttpPost(
 					"http://104.254.216.237/oneroom/phpscripts/login.php");
 			
+			EditText oldpass = (EditText) accountSettingsView
+					.findViewById(R.id.editTextOldPassword);
+			EditText newpass = (EditText) accountSettingsView
+					.findViewById(R.id.editTextNewPassword);
+			EditText newpassC = (EditText) accountSettingsView
+					.findViewById(R.id.editTextConfirmPassword);
+			EditText userName = (EditText) accountSettingsView
+					.findViewById(R.id.editTextName);
+			EditText email = (EditText) accountSettingsView
+					.findViewById(R.id.editTextEmail);
 			try {
 				// CHECK TO SEE IF OLD PASS IS SAME.
-				// Log.d("CHP", "STARTING TO GRAB");
-
-				EditText oldpass = (EditText) accountSettingsView
-						.findViewById(R.id.editTextOldPassword);
-				EditText newpass = (EditText) accountSettingsView
-						.findViewById(R.id.editTextNewPassword);
-				EditText newpassC = (EditText) accountSettingsView
-						.findViewById(R.id.editTextConfirmPassword);
-				EditText userName = (EditText) accountSettingsView
-						.findViewById(R.id.editTextName);
-				EditText email = (EditText) accountSettingsView
-						.findViewById(R.id.editTextEmail);
-				
+				// Log.d("CHP", "STARTING TO GRAB");				
 				List<NameValuePair> nameValuePairsCheck = new ArrayList<NameValuePair>(2);
 				nameValuePairsCheck.add(new BasicNameValuePair("email", email
 						.getText().toString()));
@@ -462,11 +462,37 @@ public class DashboardItemDetailFragment extends Fragment {
 						Log.d("DEBUG", responseString);
 					}else{
 						Log.d("DEBUG", "PASSWORDS DONT MATCH");
-						//TODO PASSWORDS DONT MATCH
+						new AlertDialog.Builder(getActivity())
+						.setTitle("Error")
+						.setMessage("Passwords do not match!")
+						.setPositiveButton(android.R.string.yes,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int which) {
+
+									}
+								}).setIcon(android.R.drawable.ic_dialog_alert)
+						.show();
+			oldpass.setText("");
+			newpass.setText("");
+			newpassC.setText("");
 					}
 				}else{
 					Log.d("DEBUG", "INVALID PASSWORD");
-					//TODO INVALID PASSWORD
+					new AlertDialog.Builder(getActivity())
+					.setTitle("Error")
+					.setMessage("Invalid Password!")
+					.setPositiveButton(android.R.string.yes,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int which) {
+
+								}
+							}).setIcon(android.R.drawable.ic_dialog_alert)
+					.show();
+		oldpass.setText("");
+		newpass.setText("");
+		newpassC.setText("");
 				}
 				
 			} catch (Exception e) {
@@ -474,6 +500,20 @@ public class DashboardItemDetailFragment extends Fragment {
 
 			}
 			Log.d("YOUDIDIT", "SAVED PASSWORD");
+			new AlertDialog.Builder(getActivity())
+			.setTitle("Success")
+			.setMessage("Password has been changed!")
+			.setPositiveButton(android.R.string.yes,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,
+								int which) {
+
+						}
+					}).setIcon(android.R.drawable.ic_dialog_alert)
+			.show();
+oldpass.setText("");
+newpass.setText("");
+newpassC.setText("");
 		}
 	};
 
@@ -482,18 +522,43 @@ public class DashboardItemDetailFragment extends Fragment {
 		public void onClick(View v) {
 			HttpClient httpclient = new DefaultHttpClient();
 			HttpPost httppost = new HttpPost(
-					"http://104.254.216.237/oneroom/phpscripts/editUser.php");
-			try {
-				EditText userName = (EditText) accountSettingsView
-						.findViewById(R.id.editTextName);
-				EditText email = (EditText) accountSettingsView
-						.findViewById(R.id.editTextEmail);
-				// TODO HAVE BRANDON ADD A EDIT SETTINGS WITHOUT THE PASSWORD
+					"http://104.254.216.237/oneroom/phpscripts/editUserNoPass.php");
+			EditText userName = (EditText) accountSettingsView
+					.findViewById(R.id.editTextName);
+			EditText email = (EditText) accountSettingsView
+					.findViewById(R.id.editTextEmail);
+			String emailNew = email.getText().toString();
+			String userNameNew = userName.getText().toString();
+			try {				
+				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+				nameValuePairs.add(new BasicNameValuePair("id", String
+						.valueOf(LoginScreenActivity.id)));
+				nameValuePairs.add(new BasicNameValuePair("name", userNameNew));
+				nameValuePairs.add(new BasicNameValuePair("email", emailNew));
+				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				HttpResponse response = httpclient.execute(httppost);
+				HttpEntity entity = response.getEntity();
+				String responseString = EntityUtils.toString(entity, "UTF-8");
 
+				Log.d("RESPONSE", responseString);
+				
 			} catch (Exception e) {
-
+				Log.d("ERROR CHANGING PASSWORD", "ERROR", e);
 			}
 			Log.d("YOUDIDIT", "SAVED SETTINGS");
+			new AlertDialog.Builder(getActivity())
+			.setTitle("Success")
+			.setMessage("Settings have been changed!")
+			.setPositiveButton(android.R.string.yes,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,
+								int which) {
+
+						}
+					}).setIcon(android.R.drawable.ic_dialog_alert)
+			.show();
+userName.setText(userNameNew);
+email.setText(emailNew);
 		}
 	};
 
