@@ -408,45 +408,67 @@ public class DashboardItemDetailFragment extends Fragment {
 			HttpClient httpclient = new DefaultHttpClient();
 			HttpPost httppost = new HttpPost(
 					"http://104.254.216.237/oneroom/phpscripts/editUser.php");
+			HttpPost httppost2 = new HttpPost(
+					"http://104.254.216.237/oneroom/phpscripts/login.php");
+			
 			try {
 				// CHECK TO SEE IF OLD PASS IS SAME.
 				// Log.d("CHP", "STARTING TO GRAB");
 
 				EditText oldpass = (EditText) accountSettingsView
 						.findViewById(R.id.editTextOldPassword);
-				Log.d("CHP", oldpass.getText().toString());
 				EditText newpass = (EditText) accountSettingsView
 						.findViewById(R.id.editTextNewPassword);
-				Log.d("CHP", newpass.getText().toString());
+				EditText newpassC = (EditText) accountSettingsView
+						.findViewById(R.id.editTextConfirmPassword);
 				EditText userName = (EditText) accountSettingsView
 						.findViewById(R.id.editTextName);
-				Log.d("CHP", userName.getText().toString());
 				EditText email = (EditText) accountSettingsView
 						.findViewById(R.id.editTextEmail);
-				Log.d("CHP", email.getText().toString());
-
-				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
-						3);
-				nameValuePairs.add(new BasicNameValuePair("id", String
-						.valueOf(LoginScreenActivity.id)));
-				nameValuePairs.add(new BasicNameValuePair("name", userName
+				
+				List<NameValuePair> nameValuePairsCheck = new ArrayList<NameValuePair>(2);
+				nameValuePairsCheck.add(new BasicNameValuePair("email", email
 						.getText().toString()));
-				nameValuePairs.add(new BasicNameValuePair("email", email
+				nameValuePairsCheck.add(new BasicNameValuePair("password", oldpass
 						.getText().toString()));
-				nameValuePairs.add(new BasicNameValuePair("password", newpass
-						.getText().toString()));
-				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				httppost2.setEntity(new UrlEncodedFormEntity(nameValuePairsCheck));
 
-				Log.d("CHP", "Changing password to "
-						+ newpass.getText().toString());
-
-				// Execute HTTP Post Request
-				HttpResponse response = httpclient.execute(httppost);
-				HttpEntity entity = response.getEntity();
-				String responseString = EntityUtils.toString(entity, "UTF-8");
-
-				Log.d("DEBUG", responseString);
-
+				HttpResponse responseCheck = httpclient.execute(httppost2);
+				HttpEntity entityCheck = responseCheck.getEntity();
+				String responseStringCheck = EntityUtils.toString(entityCheck, "UTF-8");
+				Log.d("DEBUG", responseStringCheck);
+				
+				if(!responseStringCheck.equals("-1-1")){
+					if(newpass.getText().toString().equals(newpassC.getText().toString())){
+						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+						nameValuePairs.add(new BasicNameValuePair("id", String
+								.valueOf(LoginScreenActivity.id)));
+						nameValuePairs.add(new BasicNameValuePair("name", userName
+								.getText().toString()));
+						nameValuePairs.add(new BasicNameValuePair("email", email
+								.getText().toString()));
+						nameValuePairs.add(new BasicNameValuePair("password", newpass
+								.getText().toString()));
+						httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+		
+						Log.d("CHP", "Changing password to "
+								+ newpass.getText().toString());
+		
+						// Execute HTTP Post Request
+						HttpResponse response = httpclient.execute(httppost);
+						HttpEntity entity = response.getEntity();
+						String responseString = EntityUtils.toString(entity, "UTF-8");
+		
+						Log.d("DEBUG", responseString);
+					}else{
+						Log.d("DEBUG", "PASSWORDS DONT MATCH");
+						//TODO PASSWORDS DONT MATCH
+					}
+				}else{
+					Log.d("DEBUG", "INVALID PASSWORD");
+					//TODO INVALID PASSWORD
+				}
+				
 			} catch (Exception e) {
 				Log.d("ERROR CHANGING PASSWORD", "ERROR", e);
 
