@@ -183,7 +183,7 @@ public class DashboardItemDetailFragment extends Fragment {
 
 		try {
 			URL server = new URL(
-					"http://104.254.216.237/oneroom/phpscripts/getUtils.php");
+					"http://104.254.216.237/oneroom/phpscripts/getUtils.php?userID=" + LoginScreenActivity.id);
 			URLConnection r = server.openConnection();
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					r.getInputStream()));

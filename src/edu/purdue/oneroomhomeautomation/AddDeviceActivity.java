@@ -68,6 +68,10 @@ public class AddDeviceActivity extends Activity {
 								.add(new BasicNameValuePair("state", "0"));
 						state = 0;
 					}
+
+					nameValuePairs.add(new BasicNameValuePair("userID", String
+							.valueOf(LoginScreenActivity.id)));
+
 					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 					Log.d("DEBUG", String.valueOf(state));
 
