@@ -84,13 +84,13 @@ public class RegisterActivity extends Activity {
 					String responseString = EntityUtils.toString(entity, "UTF-8");
 					//JSONArray r = new JSONArray();
 					//id = r.getInt(0);
-					id = Integer.parseInt(responseString);
+					LoginScreenActivity.id = Integer.parseInt(responseString);
 					
 					Log.d("DEBUG", responseString);
 				} catch (Exception e) {
 					Log.d("DEBUG", "SOMETHING WENT WRONG!", e);
 				}
-				if (id >= 0) {
+				if (LoginScreenActivity.id >= 0) {
 					new AlertDialog.Builder(arg0.getContext())
 					.setTitle("Congratulations!")
 					.setMessage("User created successfully!")

@@ -63,7 +63,7 @@ public class AddDeviceActivity extends Activity {
 						Log.d("DEBUG", "1");
 					}else{
 						nameValuePairs.add(new BasicNameValuePair("state","0"));	
-						Log.d("DEBUG", "2");
+						Log.d("DEBUG", "0");
 					}
 					
 					//HttpResponse response = httpclient.execute(httppost);
@@ -79,7 +79,7 @@ public class AddDeviceActivity extends Activity {
 						.setPositiveButton(android.R.string.yes,
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,int which) {
-										Intent dashboardIntent = new Intent(v.getContext(),DashboardItemListActivity.class);
+										Intent dashboardIntent = new Intent(v.getContext(),AddDeviceActivity.class);
 										startActivity(dashboardIntent);
 										finish();
 									}
@@ -88,8 +88,8 @@ public class AddDeviceActivity extends Activity {
 					}
 					else{
 						new AlertDialog.Builder(v.getContext())
-						.setTitle("Register Error")
-						.setMessage("A user with that email already exists!")
+						.setTitle("Add Device Error")
+						.setMessage("Device could not be added!")
 						.setPositiveButton(android.R.string.yes,
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,

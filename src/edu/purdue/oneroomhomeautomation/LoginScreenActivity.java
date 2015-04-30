@@ -26,7 +26,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 
 public class LoginScreenActivity extends Activity {
-
+	static int id = -1;
 	/**
 	 * Set this to true if you want to try to legitimately login. If you are
 	 * doing tests without connecting to the DB, set this to false
@@ -80,7 +80,6 @@ public class LoginScreenActivity extends Activity {
 	};
 
 	private void attemptLogin() {
-		int id = -1;
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost(
 				"http://104.254.216.237/oneroom/phpscripts/login.php");

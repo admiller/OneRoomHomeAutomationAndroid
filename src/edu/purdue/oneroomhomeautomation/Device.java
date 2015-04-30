@@ -36,6 +36,7 @@ public class Device {
 
 	public void setIsOn(boolean isOn) {
 		this.isOn = isOn;
+		
 	}
 
 	public String getName() {
