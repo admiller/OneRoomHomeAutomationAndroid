@@ -61,7 +61,7 @@ public class EditDeviceActivity extends Activity {
 	private Button newTimeButton = null;
 
 	private int selectedButtonId = -1;
-	
+
 	private int[] loadedSchedules;
 
 	@Override
@@ -296,70 +296,145 @@ public class EditDeviceActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			// TODO Implement saving of edited device schedule
-			
-			// Clear all of the old schedules
-			for(int i = 0; i < loadedSchedules.length; i++) {
+
+			// Check for deleted or updated schedules
+			for (int i = 0; i < loadedSchedules.length; i++) {
 				int resp = -1;
 				int state = -1;
-				
-				HttpClient httpclient = new DefaultHttpClient();
-				HttpPost httppost = new HttpPost(
-						"http://104.254.216.237/oneroom/phpscripts/deleteSched.php");
-				try {
-					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
-							1);
-					nameValuePairs.add(new BasicNameValuePair("scheduleID",
-							String.valueOf(loadedSchedules[i])));
-					
-					Log.d(TAG, "Attempting to delete schedule with id: " + String.valueOf(loadedSchedules[i]));
-					
-					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-					Log.d("DEBUG", String.valueOf(state));
 
-					HttpResponse response = httpclient.execute(httppost);
-					HttpEntity entity = response.getEntity();
-					String responseString = EntityUtils.toString(entity,
-							"UTF-8");
-					resp = Integer.parseInt(responseString);
+				boolean foundSchedule = false;
+				for (int j = 0; j < currentDevice.getSchedule().size(); j++) {
+					ScheduledAction sa = currentDevice.getSchedule().get(j);
+					// Schedule that was loaded is still in the DB
+					if (sa.getId() == loadedSchedules[i]) {
+						foundSchedule = true;
+						Log.v(TAG, "schedule with id: " + loadedSchedules[i]
+								+ " still exists");
 
-				} catch (Exception e) {
-					Log.e(TAG, "EXCEPTION", e);
-				}			
+						HttpClient httpclient = new DefaultHttpClient();
+						HttpPost httppost = new HttpPost(
+								"http://104.254.216.237/oneroom/phpscripts/updateSched.php");
+						try {
+							List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+									1);
+							nameValuePairs.add(new BasicNameValuePair(
+									"scheduleID", String
+											.valueOf(loadedSchedules[i])));
+
+							nameValuePairs.add(new BasicNameValuePair("utilID",
+									String.valueOf(currentDevice.getId())));
+
+							String stateString = sa.isOn() ? "1" : "0";
+							nameValuePairs.add(new BasicNameValuePair("state",
+									stateString));
+
+							int time = sa.getTime().hour * 100
+									+ sa.getTime().minute;
+							nameValuePairs.add(new BasicNameValuePair("time",
+									String.valueOf(time)));
+
+							httppost.setEntity(new UrlEncodedFormEntity(
+									nameValuePairs));
+							Log.d("DEBUG", String.valueOf(state));
+
+							HttpResponse response = httpclient
+									.execute(httppost);
+							HttpEntity entity = response.getEntity();
+							String responseString = EntityUtils.toString(
+									entity, "UTF-8");
+							resp = Integer.parseInt(responseString);
+
+						} catch (Exception e) {
+							Log.e(TAG, "EXCEPTION", e);
+							break;
+						}
+
+						break;
+					}
+				}
+
+				// if we didn't find the schedule, delete it from DB
+				if (!foundSchedule) {
+					Log.v(TAG, "schedule with id: " + loadedSchedules[i]
+							+ " no longer exists");
+
+					HttpClient httpclient = new DefaultHttpClient();
+					HttpPost httppost = new HttpPost(
+							"http://104.254.216.237/oneroom/phpscripts/deleteSched.php");
+					try {
+						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+								1);
+						nameValuePairs.add(new BasicNameValuePair("scheduleID",
+								String.valueOf(loadedSchedules[i])));
+
+						Log.d(TAG, "Attempting to delete schedule with id: "
+								+ String.valueOf(loadedSchedules[i]));
+
+						httppost.setEntity(new UrlEncodedFormEntity(
+								nameValuePairs));
+						Log.d("DEBUG", String.valueOf(state));
+
+						HttpResponse response = httpclient.execute(httppost);
+						HttpEntity entity = response.getEntity();
+						String responseString = EntityUtils.toString(entity,
+								"UTF-8");
+						// resp = Integer.parseInt(responseString);
+
+					} catch (Exception e) {
+						Log.e(TAG, "EXCEPTION", e);
+					}
+				}
 			}
-			
+
 			// Add all new schedules
 			for (int i = 0; i < currentDevice.getSchedule().size(); i++) {
 				ScheduledAction sa = currentDevice.getSchedule().get(i);
-				
-				int resp = -1;
-				int state = -1;
-				
-				HttpClient httpclient = new DefaultHttpClient();
-				HttpPost httppost = new HttpPost(
-						"http://104.254.216.237/oneroom/phpscripts/createSched.php");
-				try {
-					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
-							1);
-					nameValuePairs.add(new BasicNameValuePair("utilID", String
-							.valueOf(currentDevice.getId())));
-					int intTime = sa.getTime().hour * 100 + sa.getTime().minute;
-					String isOn = sa.isOn() ? "1" : "0";
-					nameValuePairs.add(new BasicNameValuePair("time", String.valueOf(intTime)));
-					nameValuePairs.add(new BasicNameValuePair("state", isOn));
 
-					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-					Log.d("DEBUG", String.valueOf(state));
+				// make sure schedule is new
+				boolean newSchedule = true;
+				for (int j = 0; j < loadedSchedules.length; j++) {
+					if (loadedSchedules[j] == sa.getId()) {
+						newSchedule = false;
+						break;
+					}
+				}
 
-					HttpResponse response = httpclient.execute(httppost);
-					HttpEntity entity = response.getEntity();
-					String responseString = EntityUtils.toString(entity,
-							"UTF-8");
-					resp = Integer.parseInt(responseString);
+				if (newSchedule) {
 
-				} catch (Exception e) {
-					Log.getStackTraceString(e);
-					Log.d("EXCEPTION", e.toString());
+					int resp = -1;
+					int state = -1;
 
+					HttpClient httpclient = new DefaultHttpClient();
+					HttpPost httppost = new HttpPost(
+							"http://104.254.216.237/oneroom/phpscripts/createSched.php");
+					try {
+						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+								1);
+						nameValuePairs.add(new BasicNameValuePair("utilID",
+								String.valueOf(currentDevice.getId())));
+						int intTime = sa.getTime().hour * 100
+								+ sa.getTime().minute;
+						String isOn = sa.isOn() ? "1" : "0";
+						nameValuePairs.add(new BasicNameValuePair("time",
+								String.valueOf(intTime)));
+						nameValuePairs
+								.add(new BasicNameValuePair("state", isOn));
+
+						httppost.setEntity(new UrlEncodedFormEntity(
+								nameValuePairs));
+						Log.d("DEBUG", String.valueOf(state));
+
+						HttpResponse response = httpclient.execute(httppost);
+						HttpEntity entity = response.getEntity();
+						String responseString = EntityUtils.toString(entity,
+								"UTF-8");
+						resp = Integer.parseInt(responseString);
+
+					} catch (Exception e) {
+						Log.getStackTraceString(e);
+						Log.d("EXCEPTION", e.toString());
+
+					}
 				}
 			}
 
