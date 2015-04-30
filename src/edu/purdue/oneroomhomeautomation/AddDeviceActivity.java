@@ -49,62 +49,38 @@ public class AddDeviceActivity extends Activity {
 		@Override
 		public void onClick(final View v) {
 			int resp = -1;
+			int state = -1;
 			if (ATTEMPT_TO_CONNECT) {
 				HttpClient httpclient = new DefaultHttpClient();
 				HttpPost httppost = new HttpPost(
 						"http://104.254.216.237/oneroom/phpscripts/createUtil.php");
 				try {
-					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-					nameValuePairs.add(new BasicNameValuePair("name", deviceNameEditText
+					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+					nameValuePairs.add(new BasicNameValuePair("utilName", deviceNameEditText
 							.getText().toString()));
-					Log.d("DEBUG", deviceNameEditText.getText().toString());
 					if(deviceToggleButton.isChecked()){
 						nameValuePairs.add(new BasicNameValuePair("state","1"));
-						Log.d("DEBUG", "1");
+						state = 1;
 					}else{
-						nameValuePairs.add(new BasicNameValuePair("state","0"));	
-						Log.d("DEBUG", "0");
+						nameValuePairs.add(new BasicNameValuePair("state","0"));
+						state=0;
 					}
+					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+					Log.d("DEBUG", String.valueOf(state));
 					
-					//HttpResponse response = httpclient.execute(httppost);
-					//HttpEntity entity = response.getEntity();
-					//String responseString = EntityUtils.toString(entity, "UTF-8");
-					//resp = Integer.parseInt(responseString);
+					HttpResponse response = httpclient.execute(httppost);
+					HttpEntity entity = response.getEntity();
+					String responseString = EntityUtils.toString(entity, "UTF-8");
+					resp = Integer.parseInt(responseString);
 					
-					
-					if(resp>=0){
-						new AlertDialog.Builder(v.getContext())
-						.setTitle("Congratulations!")
-						.setMessage("Device Created Successfully!")
-						.setPositiveButton(android.R.string.yes,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,int which) {
-										Intent dashboardIntent = new Intent(v.getContext(),AddDeviceActivity.class);
-										startActivity(dashboardIntent);
-										finish();
-									}
-								}).setIcon(android.R.drawable.ic_dialog_alert)
-						.show();
-					}
-					else{
-						new AlertDialog.Builder(v.getContext())
-						.setTitle("Add Device Error")
-						.setMessage("Device could not be added!")
-						.setPositiveButton(android.R.string.yes,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int which) {
-
-									}
-								}).setIcon(android.R.drawable.ic_dialog_alert)
-						.show();
-						deviceNameEditText.setText("");
-						deviceToggleButton.setChecked(false);
-					}
 				}catch(Exception e){
-					Log.d("DEBUG", "SOMETHING WENT WRONG!", e);
+					Log.getStackTraceString(e);
+					Log.d("EXCEPTION", e.toString());
+					
 				}
+				
 			}
+			
 			finish();
 		}
 	};

@@ -1,5 +1,9 @@
 package edu.purdue.oneroomhomeautomation;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +79,7 @@ public class DashboardItemDetailFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		Device.getDevices().clear();
 		if (getArguments().containsKey(ARG_ITEM_ID)) {
 			// Load the dummy content specified by the fragment
 			// arguments. In a real-world scenario, use a Loader
@@ -167,6 +171,36 @@ public class DashboardItemDetailFragment extends Fragment {
 	}
 
 	public void showConnectedDevices() {
+		
+		try{
+		URL server = new URL("http://104.254.216.237/oneroom/phpscripts/getUtils.php");
+		URLConnection r = server.openConnection();
+		BufferedReader in = new BufferedReader(new InputStreamReader(r.getInputStream()));
+		JSONArray resp = new JSONArray(in.readLine());
+		for(int i=0; i<resp.length();i++){
+			Device temp = null;
+			if(resp.getJSONArray(i).toString().endsWith("0\"]")){
+				temp = new Device(resp.getJSONArray(i).get(1).toString(), false);
+			}else if (resp.getJSONArray(i).toString().endsWith("1\"]")){
+				temp = new Device(resp.getJSONArray(i).get(1).toString(), true);
+			}
+			Device.getDevices().add(temp);
+		}
+		in.close();
+		}catch(Exception e){
+			
+		}
+		/*try {
+			
+			HttpResponse response = httpclient.execute(httppost);
+			HttpEntity entity = response.getEntity();
+			String responseString = EntityUtils.toString(entity, "UTF-8");
+			
+		}catch(Exception e){
+			Log.getStackTraceString(e);
+			Log.d("EXCEPTION", e.toString());
+		}
+		*/
 		rootView = createConnectedDevicesContent(rootView);
 		if (rootView == null) {
 			return;
@@ -185,13 +219,9 @@ public class DashboardItemDetailFragment extends Fragment {
 
 		// TODO get the list of devices from the server. Hard coded atm
 		if (Device.getDevices().size() < 0) {
-			Device lightsDevice = new Device("Lights", false);
-			Device cameraDevice = new Device("Camera", true);
-
-			Device.getDevices().add(lightsDevice);
-			Device.getDevices().add(cameraDevice);
+			
 		}
-
+		
 		if (Device.getDevices().size() > 0) {
 			// keeps track of the lowest toggle button for layout purposes
 			ToggleButton bottomToggle = null;
@@ -314,6 +344,38 @@ public class DashboardItemDetailFragment extends Fragment {
 	private OnClickListener savePasswordOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpPost httppost = new HttpPost(
+					"http://104.254.216.237/oneroom/phpscripts/editUser.php");
+			try {
+				//CHECK TO SEE IF OLD PASS IS SAME.
+				EditText oldpass = (EditText) rootView
+						.findViewById(R.id.editTextOldPassword);
+				EditText newpass = (EditText) rootView
+						.findViewById(R.id.editTextNewPassword);
+				EditText userName = (EditText) rootView
+						.findViewById(R.id.editTextName);
+				EditText email = (EditText) rootView
+						.findViewById(R.id.editTextEmail);
+				
+				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+				nameValuePairs.add(new BasicNameValuePair("id", String.valueOf(LoginScreenActivity.id)));
+				nameValuePairs.add(new BasicNameValuePair("name", userName.getText().toString()));
+				nameValuePairs.add(new BasicNameValuePair("email", email.getText().toString()));
+				nameValuePairs.add(new BasicNameValuePair("password", newpass.getText().toString()));
+				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				
+				// Execute HTTP Post Request
+				HttpResponse response = httpclient.execute(httppost);
+				HttpEntity entity = response.getEntity();
+				String responseString = EntityUtils.toString(entity, "UTF-8");
+				
+				Log.d("DEBUG", responseString);
+				
+				
+			}catch(Exception e){
+				
+			}
 			Log.d("YOUDIDIT","SAVED PASSWORD");
 		}
 	};
@@ -321,6 +383,19 @@ public class DashboardItemDetailFragment extends Fragment {
 	private OnClickListener saveSettingsOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpPost httppost = new HttpPost(
+					"http://104.254.216.237/oneroom/phpscripts/editUser.php");
+			try {
+				EditText userName = (EditText) rootView
+						.findViewById(R.id.editTextName);
+				EditText email = (EditText) rootView
+						.findViewById(R.id.editTextEmail);
+				//TODO HAVE BRANDON ADD A EDIT SETTINGS WITHOUT THE PASSWORD
+				
+			}catch(Exception e){
+				
+			}
 			Log.d("YOUDIDIT","SAVED SETTINGS");
 		}
 	};
