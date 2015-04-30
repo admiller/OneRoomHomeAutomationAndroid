@@ -76,6 +76,7 @@ public class DashboardItemDetailFragment extends Fragment {
 	}
 
 	public View rootView;
+	public View accountSettingsView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -111,6 +112,12 @@ public class DashboardItemDetailFragment extends Fragment {
 						false);
 				showConnectedDevices();
 			} else if (mItem.content.equals("Account Settings")) {
+				
+				rootView = inflater.inflate(
+						R.layout.fragment_accountsettings_detail,
+						container, false);
+				rootView = createAccountSettingsContent(rootView);
+				getActivity().getActionBar().setTitle("Account Settings");
 
 				HttpClient httpclient = new DefaultHttpClient();
 				HttpPost httppost = new HttpPost(
@@ -132,12 +139,6 @@ public class DashboardItemDetailFragment extends Fragment {
 
 					Log.d("DEBUG", responseString);
 
-					rootView = inflater.inflate(
-							R.layout.fragment_accountsettings_detail,
-							container, false);
-					rootView = createAccountSettingsContent(rootView);
-					getActivity().getActionBar().setTitle("Account Settings");
-
 					// TODO Lee you can set the text here.
 					EditText userName = (EditText) rootView
 							.findViewById(R.id.editTextName);
@@ -155,6 +156,8 @@ public class DashboardItemDetailFragment extends Fragment {
 							.findViewById(R.id.buttonChangePassword);
 					savePassword
 							.setOnClickListener(savePasswordOnClickListener);
+					
+					accountSettingsView = rootView;
 
 				} catch (Exception e) {
 					Log.d("ERRORRRRR", e.toString());
@@ -402,13 +405,14 @@ public class DashboardItemDetailFragment extends Fragment {
 			try {
 				// CHECK TO SEE IF OLD PASS IS SAME.
 				//Log.d("CHP", "STARTING TO GRAB");
-				EditText oldpass = (EditText) v.findViewById(R.id.editTextOldPassword);
+				
+				EditText oldpass = (EditText) accountSettingsView.findViewById(R.id.editTextOldPassword);
 				Log.d("CHP", oldpass.getText().toString());
-				EditText newpass = (EditText) v.findViewById(R.id.editTextNewPassword);
+				EditText newpass = (EditText) accountSettingsView.findViewById(R.id.editTextNewPassword);
 				Log.d("CHP", newpass.getText().toString());
-				EditText userName = (EditText) v.findViewById(R.id.editTextName);
+				EditText userName = (EditText) accountSettingsView.findViewById(R.id.editTextName);
 				Log.d("CHP", userName.getText().toString());
-				EditText email = (EditText) v.findViewById(R.id.editTextEmail);
+				EditText email = (EditText) accountSettingsView.findViewById(R.id.editTextEmail);
 				Log.d("CHP", email.getText().toString());
 		
 				
@@ -423,6 +427,8 @@ public class DashboardItemDetailFragment extends Fragment {
 				nameValuePairs.add(new BasicNameValuePair("password", newpass
 						.getText().toString()));
 				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				
+				Log.d("CHP", "Changing password to " + newpass.getText().toString());
 
 
 				
