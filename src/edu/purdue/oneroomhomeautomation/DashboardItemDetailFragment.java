@@ -140,6 +140,11 @@ public class DashboardItemDetailFragment extends Fragment {
 				userName.setText(r.getString(2));
 				email.setText(r.getString(3));
 				
+				Button saveSettings = (Button) rootView.findViewById(R.id.buttonSaveSettings);
+				saveSettings.setOnClickListener(saveSettingsOnClickListener);
+				
+				Button savePassword = (Button) rootView.findViewById(R.id.buttonChangePassword);
+				savePassword.setOnClickListener(savePasswordOnClickListener);
 				
 				}catch(Exception e){
 					Log.d("ERRORRRRR", "bad things happened");
@@ -306,6 +311,20 @@ public class DashboardItemDetailFragment extends Fragment {
 		}
 	};
 
+	private OnClickListener savePasswordOnClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Log.d("YOUDIDIT","SAVED PASSWORD");
+		}
+	};
+	
+	private OnClickListener saveSettingsOnClickListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Log.d("YOUDIDIT","SAVED SETTINGS");
+		}
+	};
+	
 	private OnClickListener logoutButtonOnClickListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
