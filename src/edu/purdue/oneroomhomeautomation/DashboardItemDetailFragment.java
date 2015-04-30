@@ -185,8 +185,9 @@ public class DashboardItemDetailFragment extends Fragment {
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					r.getInputStream()));
 			JSONArray resp = new JSONArray(in.readLine());
+
+			Log.d(TAG, resp.toString());
 			for (int i = 0; i < resp.length(); i++) {
-				// Log.d(TAG, resp.toString());
 
 				// Check to make sure the device is not in our list already
 				int devId = resp.getJSONArray(i).getInt(0);
@@ -208,10 +209,10 @@ public class DashboardItemDetailFragment extends Fragment {
 				// it to the list
 				if (!deviceExists) {
 					Device temp = null;
-					if (resp.getJSONArray(i).toString().endsWith("0\"]")) {
+					if (resp.getJSONArray(i).getInt(2) == 0) {
 						temp = new Device(resp.getJSONArray(i).getString(1),
 								false, resp.getJSONArray(i).getInt(0));
-					} else if (resp.getJSONArray(i).toString().endsWith("1\"]")) {
+					} else if (resp.getJSONArray(i).getInt(2) == 1) {
 						temp = new Device(resp.getJSONArray(i).getString(1),
 								true, resp.getJSONArray(i).getInt(0));
 					}

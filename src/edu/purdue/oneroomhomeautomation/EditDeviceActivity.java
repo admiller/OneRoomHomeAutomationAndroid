@@ -1,5 +1,24 @@
 package edu.purdue.oneroomhomeautomation;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -31,6 +50,8 @@ public class EditDeviceActivity extends Activity {
 
 	public static final int TIME_BUTTON_ID = 8000;
 
+	public static final int DELETE_BUTTON_ID = 9000;
+
 	public static final int TIME_PICKER_ID = 999;
 
 	public static Device currentDevice;
@@ -38,8 +59,10 @@ public class EditDeviceActivity extends Activity {
 	private Button submitButton = null;
 	private Button cancelButton = null;
 	private Button newTimeButton = null;
-	
+
 	private int selectedButtonId = -1;
+	
+	private int[] loadedSchedules;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +78,55 @@ public class EditDeviceActivity extends Activity {
 		newTimeButton.setOnClickListener(newTimeListener);
 		getActionBar().setTitle("Edit Device");
 
-		showSchedule();
+		showSchedule(true);
 	}
 
-	private void showSchedule() {
+	private void showSchedule(boolean loadFromServer) {
+
+		if (loadFromServer) {
+			// Clear device schedule list and pull new schedule list from server
+			currentDevice.getSchedule().clear();
+			try {
+
+				URL server = new URL(
+						"http://104.254.216.237/oneroom/phpscripts/getSchedules.php?utilID="
+								+ currentDevice.getId());
+				URLConnection r = server.openConnection();
+				BufferedReader in = new BufferedReader(new InputStreamReader(
+						r.getInputStream()));
+				JSONArray resp = new JSONArray(in.readLine());
+
+				Log.d(TAG, "Num schedules: " + resp.length());
+				loadedSchedules = new int[resp.length()];
+				Log.d(TAG, resp.toString());
+				for (int i = 0; i < resp.length(); i++) {
+
+					ScheduledAction temp = null;
+					int intTime = resp.getJSONArray(i).getInt(1);
+					int hour = intTime / 100;
+					int minute = intTime % 100;
+					Time time = new Time();
+					time.hour = hour;
+					time.minute = minute;
+					boolean isOn = resp.getJSONArray(i).getInt(2) == 1;
+					int schedId = resp.getJSONArray(i).getInt(0);
+					temp = new ScheduledAction(time, isOn, schedId);
+					loadedSchedules[i] = schedId;
+
+					currentDevice.getSchedule().add(temp);
+				}
+
+				in.close();
+
+				// Sort schedules by Time
+				Collections.sort(currentDevice.getSchedule());
+				Log.d(TAG, "Loaded " + currentDevice.getSchedule().size()
+						+ " schedules for device " + currentDevice.getId());
+			} catch (Exception e) {
+				Log.e(TAG, "Exception", e);
+			}
+		}
+
 		RelativeLayout rl = (RelativeLayout) findViewById(R.id.relativeLayoutEditDevice);
 		// Clear the layout (except for static items)
 		rl.removeViews(4, rl.getChildCount() - 4);
@@ -76,7 +144,8 @@ public class EditDeviceActivity extends Activity {
 			timeTextView.setId(TEXT_VIEW_ID + (i * 2));
 
 			Button timeButton = new Button(EditDeviceActivity.this);
-			timeButton.setText(sa.getTime().hour + ":" + sa.getTime().minute);
+			timeButton.setText(String.format("%02d", sa.getTime().hour) + ":"
+					+ String.format("%02d", sa.getTime().minute));
 			timeButton.setId(TIME_BUTTON_ID + i);
 			sa.setTimeButton(timeButton);
 			timeButton.setOnClickListener(timeListener);
@@ -92,6 +161,12 @@ public class EditDeviceActivity extends Activity {
 			tb.setId(TOGGLE_BUTTON_ID + i);
 			sa.setToggleButton(tb);
 			tb.setOnCheckedChangeListener(toggleButtonChangeListener);
+
+			Button deleteButton = new Button(EditDeviceActivity.this);
+			deleteButton.setText("Delete");
+			deleteButton.setId(DELETE_BUTTON_ID + i);
+			sa.setDeleteButton(deleteButton);
+			deleteButton.setOnClickListener(deleteButtonListener);
 
 			RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -119,21 +194,32 @@ public class EditDeviceActivity extends Activity {
 			rl.addView(timeButton);
 
 			// Set the Setting TextView layout parameters and add it
-			rlp = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			rlp.addRule(RelativeLayout.BELOW, timeButton.getId());
-			rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-			settingTextView.setLayoutParams(rlp);
-			rl.addView(settingTextView);
+			// rlp = new RelativeLayout.LayoutParams(
+			// RelativeLayout.LayoutParams.WRAP_CONTENT,
+			// RelativeLayout.LayoutParams.WRAP_CONTENT);
+			// rlp.addRule(RelativeLayout.BELOW, timeButton.getId());
+			// rlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+			// settingTextView.setLayoutParams(rlp);
+			// rl.addView(settingTextView);
 
 			// Set the ToggleButton layout parameters and add it
 			rlp = new RelativeLayout.LayoutParams(
 					RelativeLayout.LayoutParams.WRAP_CONTENT,
 					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			rlp.addRule(RelativeLayout.BELOW, settingTextView.getId());
+			rlp.addRule(RelativeLayout.RIGHT_OF, timeButton.getId());
+			rlp.addRule(RelativeLayout.BELOW, timeTextView.getId());
 			tb.setLayoutParams(rlp);
 			rl.addView(tb);
+
+			// Set the DeleteButton layout parameters and add it
+			rlp = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT);
+			rlp.addRule(RelativeLayout.RIGHT_OF, tb.getId());
+			rlp.addRule(RelativeLayout.BELOW, timeTextView.getId());
+			deleteButton.setLayoutParams(rlp);
+			rl.addView(deleteButton);
+
 			// Set the bottomToggle field
 			bottomToggle = tb;
 
@@ -152,21 +238,23 @@ public class EditDeviceActivity extends Activity {
 	private TimePickerDialog.OnTimeSetListener timePickerListener = new TimePickerDialog.OnTimeSetListener() {
 		@Override
 		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			for(int i = 0; i < currentDevice.getSchedule().size(); i++) {
+			for (int i = 0; i < currentDevice.getSchedule().size(); i++) {
 				ScheduledAction sa = currentDevice.getSchedule().get(i);
-				if(sa.getTimeButton().getId() == selectedButtonId) {
+				if (sa.getTimeButton().getId() == selectedButtonId) {
 					Time time = new Time();
 					time.hour = hourOfDay;
 					time.minute = minute;
 					sa.setTime(time);
 					Log.v(TAG, "Set time to " + time.hour + ":" + time.minute);
-					sa.getTimeButton().setText(time.hour + ":" + time.minute);
+					sa.getTimeButton().setText(
+							String.format("%02d", time.hour) + ":"
+									+ String.format("%02d", time.minute));
 					break;
 				}
 			}
 		}
 	};
-	
+
 	private OnClickListener timeListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -174,7 +262,7 @@ public class EditDeviceActivity extends Activity {
 			showDialog(TIME_PICKER_ID);
 		}
 	};
-	
+
 	private OnCheckedChangeListener toggleButtonChangeListener = new OnCheckedChangeListener() {
 		@Override
 		public void onCheckedChanged(CompoundButton button, boolean isOn) {
@@ -189,10 +277,92 @@ public class EditDeviceActivity extends Activity {
 		}
 	};
 
+	private OnClickListener deleteButtonListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			for (int i = 0; i < currentDevice.getSchedule().size(); i++) {
+				ScheduledAction sa = currentDevice.getSchedule().get(i);
+				if (sa.getDeleteButton().getId() == v.getId()) {
+					currentDevice.getSchedule().remove(i);
+					// TODO communicate with server to make this setting save
+					break;
+				}
+			}
+			showSchedule(false);
+		}
+	};
+
 	private OnClickListener submitListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
 			// TODO Implement saving of edited device schedule
+			
+			// Clear all of the old schedules
+			for(int i = 0; i < loadedSchedules.length; i++) {
+				int resp = -1;
+				int state = -1;
+				
+				HttpClient httpclient = new DefaultHttpClient();
+				HttpPost httppost = new HttpPost(
+						"http://104.254.216.237/oneroom/phpscripts/deleteSched.php");
+				try {
+					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+							1);
+					nameValuePairs.add(new BasicNameValuePair("scheduleID",
+							String.valueOf(loadedSchedules[i])));
+					
+					Log.d(TAG, "Attempting to delete schedule with id: " + String.valueOf(loadedSchedules[i]));
+					
+					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+					Log.d("DEBUG", String.valueOf(state));
+
+					HttpResponse response = httpclient.execute(httppost);
+					HttpEntity entity = response.getEntity();
+					String responseString = EntityUtils.toString(entity,
+							"UTF-8");
+					resp = Integer.parseInt(responseString);
+
+				} catch (Exception e) {
+					Log.e(TAG, "EXCEPTION", e);
+				}			
+			}
+			
+			// Add all new schedules
+			for (int i = 0; i < currentDevice.getSchedule().size(); i++) {
+				ScheduledAction sa = currentDevice.getSchedule().get(i);
+				
+				int resp = -1;
+				int state = -1;
+				
+				HttpClient httpclient = new DefaultHttpClient();
+				HttpPost httppost = new HttpPost(
+						"http://104.254.216.237/oneroom/phpscripts/createSched.php");
+				try {
+					List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+							1);
+					nameValuePairs.add(new BasicNameValuePair("utilID", String
+							.valueOf(currentDevice.getId())));
+					int intTime = sa.getTime().hour * 100 + sa.getTime().minute;
+					String isOn = sa.isOn() ? "1" : "0";
+					nameValuePairs.add(new BasicNameValuePair("time", String.valueOf(intTime)));
+					nameValuePairs.add(new BasicNameValuePair("state", isOn));
+
+					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+					Log.d("DEBUG", String.valueOf(state));
+
+					HttpResponse response = httpclient.execute(httppost);
+					HttpEntity entity = response.getEntity();
+					String responseString = EntityUtils.toString(entity,
+							"UTF-8");
+					resp = Integer.parseInt(responseString);
+
+				} catch (Exception e) {
+					Log.getStackTraceString(e);
+					Log.d("EXCEPTION", e.toString());
+
+				}
+			}
+
 			// Close editing page
 			finish();
 		}
@@ -212,8 +382,9 @@ public class EditDeviceActivity extends Activity {
 			Time time = new Time();
 			time.hour = 0;
 			time.minute = 0;
-			currentDevice.getSchedule().add(new ScheduledAction(time, true));
-			showSchedule();
+			currentDevice.getSchedule()
+					.add(new ScheduledAction(time, true, -1));
+			showSchedule(false);
 		}
 	};
 
