@@ -82,8 +82,7 @@ public class AddDeviceActivity extends Activity {
 					resp = Integer.parseInt(responseString);
 
 				} catch (Exception e) {
-					Log.getStackTraceString(e);
-					Log.d("EXCEPTION", e.toString());
+					Log.e("ORHA", "Exception", e);
 
 				}
 

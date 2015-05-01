@@ -185,7 +185,8 @@ public class DashboardItemDetailFragment extends Fragment {
 
 		try {
 			URL server = new URL(
-					"http://104.254.216.237/oneroom/phpscripts/getUtils.php?userID=" + LoginScreenActivity.id);
+					"http://104.254.216.237/oneroom/phpscripts/getUtils.php?userID="
+							+ LoginScreenActivity.id);
 			URLConnection r = server.openConnection();
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					r.getInputStream()));
@@ -362,6 +363,10 @@ public class DashboardItemDetailFragment extends Fragment {
 								1);
 						nameValuePairs.add(new BasicNameValuePair("utilName",
 								name));
+
+						nameValuePairs.add(new BasicNameValuePair("userID",
+								String.valueOf(LoginScreenActivity.id)));
+
 						if (state) {
 							nameValuePairs.add(new BasicNameValuePair("state",
 									"1"));
@@ -412,7 +417,7 @@ public class DashboardItemDetailFragment extends Fragment {
 					"http://104.254.216.237/oneroom/phpscripts/editUser.php");
 			HttpPost httppost2 = new HttpPost(
 					"http://104.254.216.237/oneroom/phpscripts/login.php");
-			
+
 			EditText oldpass = (EditText) accountSettingsView
 					.findViewById(R.id.editTextOldPassword);
 			EditText newpass = (EditText) accountSettingsView
@@ -425,63 +430,94 @@ public class DashboardItemDetailFragment extends Fragment {
 					.findViewById(R.id.editTextEmail);
 			try {
 				// CHECK TO SEE IF OLD PASS IS SAME.
-				// Log.d("CHP", "STARTING TO GRAB");				
-				List<NameValuePair> nameValuePairsCheck = new ArrayList<NameValuePair>(2);
+				// Log.d("CHP", "STARTING TO GRAB");
+				List<NameValuePair> nameValuePairsCheck = new ArrayList<NameValuePair>(
+						2);
 				nameValuePairsCheck.add(new BasicNameValuePair("email", email
 						.getText().toString()));
-				nameValuePairsCheck.add(new BasicNameValuePair("password", oldpass
-						.getText().toString()));
-				httppost2.setEntity(new UrlEncodedFormEntity(nameValuePairsCheck));
+				nameValuePairsCheck.add(new BasicNameValuePair("password",
+						oldpass.getText().toString()));
+				httppost2.setEntity(new UrlEncodedFormEntity(
+						nameValuePairsCheck));
 
 				HttpResponse responseCheck = httpclient.execute(httppost2);
 				HttpEntity entityCheck = responseCheck.getEntity();
-				String responseStringCheck = EntityUtils.toString(entityCheck, "UTF-8");
+				String responseStringCheck = EntityUtils.toString(entityCheck,
+						"UTF-8");
 				Log.d("DEBUG", responseStringCheck);
-				
-				if(!responseStringCheck.equals("-1-1")){
-					if(newpass.getText().toString().equals(newpassC.getText().toString())){
-						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+
+				if (!responseStringCheck.equals("-1-1")) {
+					if (newpass.getText().toString()
+							.equals(newpassC.getText().toString())) {
+						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+								3);
 						nameValuePairs.add(new BasicNameValuePair("id", String
 								.valueOf(LoginScreenActivity.id)));
-						nameValuePairs.add(new BasicNameValuePair("name", userName
-								.getText().toString()));
-						nameValuePairs.add(new BasicNameValuePair("email", email
-								.getText().toString()));
-						nameValuePairs.add(new BasicNameValuePair("password", newpass
-								.getText().toString()));
-						httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-		
+						nameValuePairs.add(new BasicNameValuePair("name",
+								userName.getText().toString()));
+						nameValuePairs.add(new BasicNameValuePair("email",
+								email.getText().toString()));
+						nameValuePairs.add(new BasicNameValuePair("password",
+								newpass.getText().toString()));
+						httppost.setEntity(new UrlEncodedFormEntity(
+								nameValuePairs));
+
 						Log.d("CHP", "Changing password to "
 								+ newpass.getText().toString());
-		
+
 						// Execute HTTP Post Request
 						HttpResponse response = httpclient.execute(httppost);
 						HttpEntity entity = response.getEntity();
-						String responseString = EntityUtils.toString(entity, "UTF-8");
-		
+						String responseString = EntityUtils.toString(entity,
+								"UTF-8");
+
 						Log.d("DEBUG", responseString);
-					}else{
+					} else {
 						Log.d("DEBUG", "PASSWORDS DONT MATCH");
 						new AlertDialog.Builder(getActivity())
-						.setTitle("Error")
-						.setMessage("Passwords do not match!")
-						.setPositiveButton(android.R.string.yes,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int which) {
+								.setTitle("Error")
+								.setMessage("Passwords do not match!")
+								.setPositiveButton(android.R.string.yes,
+										new DialogInterface.OnClickListener() {
+											public void onClick(
+													DialogInterface dialog,
+													int which) {
 
-									}
-								}).setIcon(android.R.drawable.ic_dialog_alert)
-						.show();
-			oldpass.setText("");
-			newpass.setText("");
-			newpassC.setText("");
+											}
+										})
+								.setIcon(android.R.drawable.ic_dialog_alert)
+								.show();
+						oldpass.setText("");
+						newpass.setText("");
+						newpassC.setText("");
 					}
-				}else{
+				} else {
 					Log.d("DEBUG", "INVALID PASSWORD");
 					new AlertDialog.Builder(getActivity())
-					.setTitle("Error")
-					.setMessage("Invalid Password!")
+							.setTitle("Error")
+							.setMessage("Invalid Password!")
+							.setPositiveButton(android.R.string.yes,
+									new DialogInterface.OnClickListener() {
+										public void onClick(
+												DialogInterface dialog,
+												int which) {
+
+										}
+									})
+							.setIcon(android.R.drawable.ic_dialog_alert).show();
+					oldpass.setText("");
+					newpass.setText("");
+					newpassC.setText("");
+				}
+
+			} catch (Exception e) {
+				Log.d("ERROR CHANGING PASSWORD", "ERROR", e);
+
+			}
+			Log.d("YOUDIDIT", "SAVED PASSWORD");
+			new AlertDialog.Builder(getActivity())
+					.setTitle("Success")
+					.setMessage("Password has been changed!")
 					.setPositiveButton(android.R.string.yes,
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
@@ -490,30 +526,9 @@ public class DashboardItemDetailFragment extends Fragment {
 								}
 							}).setIcon(android.R.drawable.ic_dialog_alert)
 					.show();
-		oldpass.setText("");
-		newpass.setText("");
-		newpassC.setText("");
-				}
-				
-			} catch (Exception e) {
-				Log.d("ERROR CHANGING PASSWORD", "ERROR", e);
-
-			}
-			Log.d("YOUDIDIT", "SAVED PASSWORD");
-			new AlertDialog.Builder(getActivity())
-			.setTitle("Success")
-			.setMessage("Password has been changed!")
-			.setPositiveButton(android.R.string.yes,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int which) {
-
-						}
-					}).setIcon(android.R.drawable.ic_dialog_alert)
-			.show();
-oldpass.setText("");
-newpass.setText("");
-newpassC.setText("");
+			oldpass.setText("");
+			newpass.setText("");
+			newpassC.setText("");
 		}
 	};
 
@@ -529,8 +544,9 @@ newpassC.setText("");
 					.findViewById(R.id.editTextEmail);
 			String emailNew = email.getText().toString();
 			String userNameNew = userName.getText().toString();
-			try {				
-				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+			try {
+				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(
+						3);
 				nameValuePairs.add(new BasicNameValuePair("id", String
 						.valueOf(LoginScreenActivity.id)));
 				nameValuePairs.add(new BasicNameValuePair("name", userNameNew));
@@ -541,24 +557,24 @@ newpassC.setText("");
 				String responseString = EntityUtils.toString(entity, "UTF-8");
 
 				Log.d("RESPONSE", responseString);
-				
+
 			} catch (Exception e) {
 				Log.d("ERROR CHANGING PASSWORD", "ERROR", e);
 			}
 			Log.d("YOUDIDIT", "SAVED SETTINGS");
 			new AlertDialog.Builder(getActivity())
-			.setTitle("Success")
-			.setMessage("Settings have been changed!")
-			.setPositiveButton(android.R.string.yes,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int which) {
+					.setTitle("Success")
+					.setMessage("Settings have been changed!")
+					.setPositiveButton(android.R.string.yes,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int which) {
 
-						}
-					}).setIcon(android.R.drawable.ic_dialog_alert)
-			.show();
-userName.setText(userNameNew);
-email.setText(emailNew);
+								}
+							}).setIcon(android.R.drawable.ic_dialog_alert)
+					.show();
+			userName.setText(userNameNew);
+			email.setText(emailNew);
 		}
 	};
 
